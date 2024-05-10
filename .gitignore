@@ -4,3 +4,4 @@ Scripts/
 .env
 creds.json
 pyvenv.cfg
+workers/__pycache__/

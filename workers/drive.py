@@ -58,7 +58,7 @@ class DriveHandler:
         To get the list of all the files on drive
         @returns a list containing objects with `kind`, `mimeType`, `id`, `name` keys of each file
         """
-        results = self.drive.files().list(q=f"'{self.folder_id}' in parents and trashed=false", fields="files(kind, mimeType, id, name)").execute()
+        results = self.drive.files().list(q=f"'{self.folder_id}' in parents and trashed=false", fields="files(kind, mimeType, id, name)", orderBy="name").execute()
         files = results.get('files', [])
         return files
 
