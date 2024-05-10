@@ -1,7 +1,6 @@
 import json
 import os
 import random
-import time
 import dotenv
 import requests
 import logging
@@ -158,4 +157,3 @@ def return_info():
 if __name__ == "__main__":
     scheduler.start()
     app.run(host="0.0.0.0",port=10000)
-    

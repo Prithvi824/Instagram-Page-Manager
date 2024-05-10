@@ -55,11 +55,22 @@ class DriveHandler:
 
     def get_list(self):
         """
-        To get the list of all the files on drive
-        @returns a list containing objects with `kind`, `mimeType`, `id`, `name` keys of each file
+        To get the list of all the files and folders in the specified drive folder.
+        
+        @returns a list containing objects with `kind`, `mimeType`, `id`, `name` keys of each file/folder
         """
-        results = self.drive.files().list(q=f"'{self.folder_id}' in parents and trashed=false", fields="files(kind, mimeType, id, name)", orderBy="name").execute()
-        files = results.get('files', [])
+        files = []
+        page_token = None
+
+        while True:
+            response = self.drive.files().list(q=f"'{self.folder_id}' in parents and trashed=false",
+                                            fields="nextPageToken, files(kind, mimeType, id, name)",
+                                            pageToken=page_token).execute()
+            files.extend(response.get('files', []))
+            page_token = response.get('nextPageToken', None)
+            if page_token is None:
+                break
+
         return files
 
     def pick_one(self):
