@@ -6,6 +6,7 @@ import logging
 
 from workers.downloader import Yt
 from workers.drive import DriveHandler
+from workers.editor import split_and_create_thumbnail
 
 dotenv.load_dotenv()
 
@@ -30,22 +31,14 @@ def midnight_cron():
     last_part = json_data["lastUsed"]
     lastReelPart = json_data["lastReelPart"]
 
-    logger.info(f"The last episode used: {last_part}")
-    logger.info(f"The episode which will be used: ep{last_part + 1}")
-    logger.info(f"The last Reel part created: {lastReelPart}")
-
     # Download the youtube video
     Yt_obj = Yt(links[f"ep{last_part + 1}"])
     path = Yt_obj.download_video()
-
-    logger.info(f"The episode was downloaded from Youtube.")
-    logger.info(f"Downloaded path: {path}")
 
     # Create short reels with the text and then delete main video
     reels = split_and_create_thumbnail(path, lastReelPart + 1)
     os.remove(path)
 
-    logger.info(f"The video was splitted into {len(reels)} parts")
     upload_ind = 0
 
     # Upload each reel and delete them simultaneously
@@ -54,9 +47,6 @@ def midnight_cron():
         if result:
             os.remove(reel)
             upload_ind += 1
-
-    logger.info(f"Toatal {upload_ind} was uploaded to drive.")
-    logger.info(f"Last part: {reels[-1]}")
 
     # Update the json data and write it in file
     json_data["lastUsed"] += 1

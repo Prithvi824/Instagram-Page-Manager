@@ -10,7 +10,7 @@ import urllib.parse
 from workers.drive import DriveHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from flask import Flask
+from flask import Flask, send_file
 
 dotenv.load_dotenv()
 
@@ -150,6 +150,10 @@ app = Flask(__name__)
 @app.route('/')
 def hello():
     return 'Hello, World!'
+
+@app.route("/fetch")
+def return_info():
+    return send_file("info.json")
 
 if __name__ == "__main__":
     scheduler.start()
