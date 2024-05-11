@@ -18,6 +18,10 @@ TOKEN = os.getenv('TOKEN')
 PAGE_ID = os.getenv('PAGE_ID')
 DRIVE = DriveHandler("creds.json", PARENT_FOLDER)
 
+captions = ["🌀 Beyblade Metal Fusion! 🌀 Let the battle begin! #Beyblade #BeybladeBlast #OldCartoons #Nostalgia #ClassicCartoons",
+                "⚔️ Let it rip! ⚔️ Dive into nostalgia with Beyblade! Who's your favorite Blader? #Beyblade #LetItRip #NostalgiaTrip #ClassicCartoons #OldSchoolAnime",
+                "💥 It's time to Beyblade! 💥 Relive the excitement of spinning tops and epic battles! #Beyblade #SpinningTops #ClassicAnime #NostalgiaTrip #CartoonClassics"]
+
 # Logger settings
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
@@ -64,7 +68,7 @@ def publish_container(page_id, container_id, token):
             json_data = json.load(file)
 
         item = json_data["pendingPublish"].pop(0)
-        new_container = create_container(TOKEN, PAGE_ID, DRIVE.get_download_link(item["file_id"]))
+        new_container = create_container(TOKEN, PAGE_ID, DRIVE.get_download_link(item["file_id"]), urllib.parse.quote(random.choice(captions)))
         json_data["pendingPublish"].insert(0, {"file_id": item["file_id"], "insta_id": new_container})
 
         logger.info(f"An Error occured with the container. Status code: {status}")
@@ -96,10 +100,6 @@ def create_container_job():
 
     # Get the download link of the video to be uploaded and create a container
     link = DRIVE.get_download_link(current_file["id"])
-    captions = ["🌀 Beyblade Metal Fusion! 🌀 Let the battle begin! #Beyblade #BeybladeBlast #OldCartoons #Nostalgia #ClassicCartoons",
-                "⚔️ Let it rip! ⚔️ Dive into nostalgia with Beyblade! Who's your favorite Blader? #Beyblade #LetItRip #NostalgiaTrip #ClassicCartoons #OldSchoolAnime",
-                "💥 It's time to Beyblade! 💥 Relive the excitement of spinning tops and epic battles! #Beyblade #SpinningTops #ClassicAnime #NostalgiaTrip #CartoonClassics"]
-
     media_id = create_container(TOKEN, PAGE_ID, link, urllib.parse.quote(random.choice(captions)))
 
     # Update the Json with the pending publish
