@@ -166,5 +166,5 @@ def upload_json():
     return jsonify({'message': 'JSON data successfully uploaded'})
 
 if __name__ == "__main__":
-    # scheduler.start()
+    scheduler.start()
     app.run(host="0.0.0.0",port=10000)
