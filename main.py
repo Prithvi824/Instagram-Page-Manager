@@ -9,7 +9,7 @@ import urllib.parse
 from workers.drive import DriveHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from flask import Flask, send_file
+from flask import Flask, request, jsonify, send_from_directory
 
 dotenv.load_dotenv()
 
@@ -150,10 +150,21 @@ app = Flask(__name__)
 def hello():
     return 'Hello, World!'
 
-@app.route("/fetch")
-def return_info():
-    return send_file("info.json")
+@app.route('/fetch', methods=['GET'])
+def get_json():
+    return send_from_directory(os.getcwd(), "info.json")
+
+@app.route('/upload', methods=['POST'])
+def upload_json():
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No JSON data received'})
+
+    with open(os.path.join(os.getcwd(), 'info.json'), 'w') as file:
+        json.dump(data, file)
+
+    return jsonify({'message': 'JSON data successfully uploaded'})
 
 if __name__ == "__main__":
-    scheduler.start()
+    # scheduler.start()
     app.run(host="0.0.0.0",port=10000)
