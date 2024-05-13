@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import threading
 import dotenv
 import requests
 import logging
@@ -115,10 +116,10 @@ def publish_container_job():
     """
     logger.info("Cron job running to publish a container.")
 
-    with open("info.json", 'r+') as json_file:
+    with open("info.json", 'r') as json_file:
         json_data = json.load(json_file)
 
-    pending_publish = json_data["pendingPublish"]
+    pending_publish = json_data.get("pendingPublish", [])
 
     if len(pending_publish) == 0:
         logger.info("No Container detected exiting Job.")
@@ -141,8 +142,8 @@ def publish_container_job():
         logger.info("Container was not published.")
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(create_container_job, 'cron', minute=f"*/30")
-scheduler.add_job(publish_container_job, 'cron', minute=f"*/30")
+scheduler.add_job(create_container_job, 'cron', minute=f"30")
+scheduler.add_job(publish_container_job, 'cron', minute=f"40")
 
 app = Flask(__name__)
 
