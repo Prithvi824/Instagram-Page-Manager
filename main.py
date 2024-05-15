@@ -64,6 +64,8 @@ def publish_container(page_id, container_id, token):
         return bool(response.json().get("id"))
     elif status == "IN_PROGRESS":
         return False
+    elif status == "PUBLISHED":
+        return True
     else:
         with open("info.json", "r+") as file:
             json_data = json.load(file)
