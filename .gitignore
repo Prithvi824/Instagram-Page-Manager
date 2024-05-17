@@ -5,3 +5,5 @@ Scripts/
 creds.json
 pyvenv.cfg
 workers/__pycache__/
+local_test.json
+__pycache__
