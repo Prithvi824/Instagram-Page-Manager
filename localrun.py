@@ -3,12 +3,15 @@ import os
 import time
 import dotenv
 import logging
-
+from database import MongoDb
 from workers.downloader import Yt
 from workers.drive import DriveHandler
 from workers.editor import split_and_create_thumbnail
 
 dotenv.load_dotenv()
+FILTER = {'page': "beyblade"}
+COLLECTION = os.getenv("COLLECTION")
+DATABASE = MongoDb(os.getenv("MONGO"), os.getenv("DATABASE"))
 
 PARENT_FOLDER = os.getenv("PARENT_FOLDER")
 DRIVE = DriveHandler("creds.json", PARENT_FOLDER)
@@ -22,9 +25,9 @@ def midnight_cron():
     """
 
     logger.info("Midnight cron job running.")
-    # Load the data from the json file
-    with open("info.json", "r+") as file:
-        json_data = json.load(file)
+    
+    # Load the json data
+    json_data = DATABASE.get_document(COLLECTION, FILTER)
 
     # Extract neccessary info
     links = json_data["links"]
@@ -49,10 +52,10 @@ def midnight_cron():
             upload_ind += 1
 
     # Update the json data and write it in file
-    json_data["lastUsed"] += 1
-    json_data["lastReelPart"] += len(reels)
-    with open("info.json", "w") as file:
-        json.dump(json_data, file)
+    response_lastUsed = DATABASE.update_document(COLLECTION, FILTER, {"$inc": {"lastUsed": 1}})
+    response_lastUpload = DATABASE.update_document(COLLECTION, FILTER, {"$inc": {"lastReelPart": len(reels)}})
+
+    logger.info(f"One episode completed, Data updatation bool: {response_lastUsed and response_lastUpload}\n")
 
 # Logger settings
 console_handler = logging.StreamHandler()
@@ -61,7 +64,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(console_handler)
 
-for i in range(10):
+for i in range(2):
     t1 = time.time()
     midnight_cron()
-    logger.info(f"Time Taken: {time.time() - t1}")
+    logger.info(f"Time Taken: {time.time() - t1}\n\n")
