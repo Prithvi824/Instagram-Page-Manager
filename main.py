@@ -143,11 +143,10 @@ def publish_container_job():
     # Publish the container
     res = publish_container(PAGE_ID, item["insta_id"], TOKEN)
     if res:
-        DRIVE.delete_one(item["file_id"])
-        json_data["lastUploaded"] += 1
         response_publish = DATABASE.update_document(COLLECTION, FILTER, {"$pop": {"pendingPublish": -1}})
         response_lastUpload = DATABASE.update_document(COLLECTION, FILTER, {"$inc": {"lastUploaded": 1}})
-        logger.info(f"Container was published succesfully. Data updatation boolean: {response_lastUpload and response_publish}")
+        deleted_status = DRIVE.delete_one(item["file_id"])
+        logger.info(f"Container was published succesfully. Data updatation boolean: {bool(response_lastUpload and response_publish)}, Drive status: {deleted_status}")
 
     else:
         logger.info("Container was not published.")

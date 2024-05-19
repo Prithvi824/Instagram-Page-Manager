@@ -1,6 +1,8 @@
-import os
+import ssl
+import time
 import random
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from google.oauth2.service_account import Credentials
 
@@ -14,9 +16,6 @@ class DriveHandler:
         @param creds_file: The name of the credentials file
         @param folder_id: The parent folder Id to interact with
         """
-
-        # A variable to keep track of downloads
-        self.COUNT = 30
 
         # Initializes the authentication
         creds = Credentials.from_service_account_file(creds_file, scopes=['https://www.googleapis.com/auth/drive'])
@@ -79,7 +78,7 @@ class DriveHandler:
         @returns a random file object `kind`, `mimeType`, `id`, `name` keys
         """
         files = self.get_list()
-        random_file = random.choice(files)
+        random_file = random.choice(files) if files else []
         return random_file
 
     def delete_one(self, file_id):
@@ -88,5 +87,13 @@ class DriveHandler:
         @param file_id
         @returns {null}
         """
-        self.drive.files().delete(fileId=file_id).execute()
-        return None
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                self.drive.files().delete(fileId=file_id).execute()
+                return True
+            except (HttpError, ssl.SSLEOFError) as e:
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)
+                else:
+                    return False
